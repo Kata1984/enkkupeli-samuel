@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samuelin oma enkkupeli</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .game-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .word-container {
+            margin: 20px 0;
+        }
+
+        input {
+            padding: 10px;
+            font-size: 18px;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .feedback {
+            font-size: 18px;
+            margin: 20px 0;
+        }
+
+        .summary {
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Samuelin oma enkkupeli</h1>
+    <div class="game-container">
+        <div class="word-container">
+            <p id="word"></p>
+            <input type="text" id="answer" placeholder="Kirjoita vastauksesi englanniksi">
+        </div>
+        <button onclick="checkAnswer()" id="check-btn">Tarkista vastaus</button>
+        <button onclick="nextWord()" id="next-btn" class="hidden">Jatka</button>
+        <button onclick="restartGame()" id="restart-btn" class="hidden">Aloita alusta</button>
+        <div class="feedback hidden" id="feedback"></div>
+        <div class="summary hidden" id="summary"></div>
+    </div>
+
+    <script>
+        const words = [
+            { finnish: "aula", english: ["lobby"] },
+            { finnish: "uima-allas", english: ["pool"] },
+            { finnish: "hissi", english: ["elevator"] },
+            { finnish: "aamiaishuone", english: ["breakfast room"] },
+            { finnish: "hotellihuone", english: ["hotel room"] },
+            { finnish: "pelihuone", english: ["game room"] },
+            { finnish: "hammasharja", english: ["toothbrush"] },
+            { finnish: "hammastahna", english: ["toothpaste"] },
+            { finnish: "kampa", english: ["comb"] },
+            { finnish: "hiusharja", english: ["hairbrush"] },
+            { finnish: "shampoo", english: ["shampoo"] },
+            { finnish: "aurinkovoide", english: ["sunblock"] },
+            { finnish: "suihkugeeli", english: ["shower gel"] },
+            { finnish: "deodorantti", english: ["deodorant"] },
+            { finnish: "ensimmäinen", english: ["first"] },
+            { finnish: "toinen", english: ["second"] },
+            { finnish: "kolmas", english: ["third"] },
+            { finnish: "neljäs", english: ["fourth"] },
+            { finnish: "itä", english: ["east"] },
+            { finnish: "Wi-Fi", english: ["Wi-Fi"] },
+            { finnish: "kirjautua sisään", english: ["check in"] },
+            { finnish: "vastaanotto", english: ["reception"] },
+            { finnish: "varaus", english: ["reservation"] },
+            { finnish: "pitää parempana", english: ["prefer"] },
+            { finnish: "varmasti", english: ["sure"] },
+            { finnish: "uimahousut", english: ["swimming trunks"] },
+            { finnish: "joku", english: ["somebody"] },
+            { finnish: "avainkortti", english: ["key card"] },
+            { finnish: "pyyhe", english: ["towel"] },
+            { finnish: "märkää", english: ["wet"] },
+            { finnish: "suurin", english: ["the biggest"] }
+        ];
+
+        let currentWordIndex = 0;
+        let correctAnswers = 0;
+        let incorrectAnswers = 0;
+
+        // Shuffle the words array to randomize order
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Start the game by shuffling the words
+        function startGame() {
+            shuffle(words);
+            currentWordIndex = 0;
+            correctAnswers = 0;
+            incorrectAnswers = 0;
+            document.getElementById("summary").classList.add("hidden");
+            document.getElementById("restart-btn").classList.add("hidden");
+            showWord();
+        }
+
+        function showWord() {
+            const wordObj = words[currentWordIndex];
+            document.getElementById("word").textContent = wordObj.finnish; // Always show Finnish word
+            document.getElementById("feedback").classList.add("hidden");
+            document.getElementById("next-btn").classList.add("hidden");
+            document.getElementById("check-btn").classList.remove("hidden");
+            document.getElementById("answer").value = '';
+            document.getElementById("answer").disabled = false;
+        }
+
+        function checkAnswer() {
+            const answer = document.getElementById("answer").value.trim().toLowerCase();
+            const wordObj = words[currentWordIndex];
+            const correctAnswersArr = wordObj.english.map(ans => ans.toLowerCase());
+
+            let isCorrect = false;
+
+            if (correctAnswersArr.includes(answer)) {
+                correctAnswers++;
+                isCorrect = true;
+                showFeedback(true);
+            } else {
+                incorrectAnswers++;
+                showFeedback(false, wordObj.english.join(" / "));
+            }
+
+            document.getElementById("answer").disabled = true;
+            document.getElementById("check-btn").classList.add("hidden");
+            document.getElementById("next-btn").classList.remove("hidden");
+        }
+
+        function showFeedback(isCorrect, correctAnswer = '') {
+            const feedback = document.getElementById("feedback");
+            if (isCorrect) {
+                feedback.textContent = `Oikein!`;
+                feedback.style.color = "green";
+            } else {
+                feedback.textContent = `Väärin! Oikea vastaus oli "${correctAnswer}".`;
+                feedback.style.color = "red";
+            }
+            feedback.classList.remove("hidden");
+        }
+
+        function nextWord() {
+            currentWordIndex++;
+
+            if (currentWordIndex % 10 === 0 || currentWordIndex === words.length) {
+                showSummary();
+            } else {
+                showWord();
+            }
+        }
+
+        function showSummary() {
+            const summary = document.getElementById("summary");
+            summary.innerHTML = `
+                <p>Oikeita vastauksia: ${correctAnswers}</p>
+                <p>Vääriä vastauksia: ${incorrectAnswers}</p>
+                <p>Jatka harjoittelua parantaaksesi taitojasi!</p>
+            `;
+            summary.classList.remove("hidden");
+            document.getElementById("next-btn").classList.add("hidden");
+            document.getElementById("check-btn").classList.add("hidden");
+            document.getElementById("restart-btn").classList.remove("hidden");
+        }
+
+        function restartGame() {
+            startGame();
+        }
+
+        startGame();
+    </script>
+</body>
+</html>
